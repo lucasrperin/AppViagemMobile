@@ -15,13 +15,7 @@ class BluetoothPage extends StatelessWidget {
       appBar: AppBar(title: const Text("Bluetooth")),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SelectableText(
-              "Token recebido: $token",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
+          const SizedBox(height: 16),
           Obx(
             () => ElevatedButton(
               onPressed: bluetoothController.isScanning.value
@@ -37,7 +31,6 @@ class BluetoothPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            // O StreamBuilder NÃO deve ficar dentro de um Obx!
             child: StreamBuilder<List<ScanResult>>(
               stream: bluetoothController.scanResults,
               builder: (context, snapshot) {
