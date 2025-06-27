@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
     "name": "apenasteste",
     "short_name": "apenasteste",
+=======
+    "name": "appviagemmobile",
+    "short_name": "appviagemmobile",
+>>>>>>> 1818cdd72adb3ba149b87fddf9dd52468f4169c1
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
