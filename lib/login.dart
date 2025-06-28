@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'bluetooth_page.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,6 +38,16 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         print('[DEBUG] Status code da resposta: ${response.statusCode}');
         print('[DEBUG] Body da resposta: ${response.body}');
+
+        if (response.statusCode == 200) {
+          final body = jsonDecode(response.body);
+          // Navega para a tela de Bluetooth passando o token
+          Get.off(() => BluetoothPage());
+        } else {
+          setState(() {
+            _error = 'Falha ao logar na API [${response.statusCode}]';
+          });
+        }
       } catch (e) {
         print('[DEBUG] Erro ao tentar conectar com a API: $e');
         setState(() {

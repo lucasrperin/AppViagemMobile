@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'bluetooth.dart';
+import 'bluetooth.dart'; // seu controlador
+import 'telas/home.dart';
 
 class BluetoothPage extends StatelessWidget {
-  final String token;
-  const BluetoothPage({super.key, required this.token});
+  const BluetoothPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,13 @@ class BluetoothPage extends StatelessWidget {
                     )
                   : const Text("Escanear dispositivos"),
             ),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () {
+              Get.to(() => const Home());
+            },
+            child: const Text("Ir para Home"),
           ),
           Expanded(
             child: StreamBuilder<List<ScanResult>>(
