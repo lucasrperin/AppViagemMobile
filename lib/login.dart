@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'bluetooth_page.dart';
 
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -40,10 +41,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (response.statusCode == 200) {
           final body = jsonDecode(response.body);
-          final token = body['token'];
-          print('[DEBUG] Token recebido: $token');
           // Navega para a tela de Bluetooth passando o token
-          Get.off(() => BluetoothPage(token: token));
+          Get.off(() => BluetoothPage());
         } else {
           setState(() {
             _error = 'Falha ao logar na API [${response.statusCode}]';
