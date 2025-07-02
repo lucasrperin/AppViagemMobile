@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'login.dart';
 import 'telas/carros.dart';
 import 'bluetooth_page.dart';
 import 'telas/home.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
@@ -20,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: LoginScreen(),
       routes: { //rotas que direcionam para as telas da aplicação
-        '/car': (context) => CarScreen(),
+        '/carros': (context) => CarScreen(),
         '/bluetooth' : (context) => BluetoothPage(),
       },
     );

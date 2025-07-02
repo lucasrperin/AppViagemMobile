@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
       home: HomeScreen(),
       routes: {
         '/bluetooth': (_) => BluetoothPage(),
-        '/car': (_) => CarScreen(),
+        '/carros': (_) => CarScreen(),
       },
     );
   }
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.directions_car,
                   size: 28, color: Colors.black87),
               onPressed: () {
-                Navigator.pushNamed(context, '/car');
+                Navigator.pushNamed(context, '/carros');
               },
               tooltip: 'Car Page',
             ),

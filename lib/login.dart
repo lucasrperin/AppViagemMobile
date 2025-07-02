@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'bluetooth_page.dart';
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,53 +16,52 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _userController = TextEditingController();
   final _passController = TextEditingController();
+  final box = GetStorage();
+
   bool _loading = false;
   String? _error;
 
   Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       _loading = true;
       _error = null;
     });
 
-    final user = _userController.text.trim();
-    final pass = _passController.text.trim();
+    try {
+      final response = await http.post(
+        Uri.parse('http://164.90.152.205:5000/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': _userController.text.trim(),
+          'password': _passController.text.trim(),
+        }),
+      );
 
-    if (user == 'admin' && pass == 'admin') {
-      try {
-        print('[DEBUG] Enviando login para API: $user / $pass');
-        final response = await http.post(
-          Uri.parse('http://164.90.152.205:5000/auth/login'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'username': user, 'password': pass}),
-        );
-        print('[DEBUG] Status code da resposta: ${response.statusCode}');
-        print('[DEBUG] Body da resposta: ${response.body}');
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final token = body['token'] as String?;
+        if (token != null) {
+          // 1) Salva o token em GetStorage
+          await box.write('token', token);
 
-        if (response.statusCode == 200) {
-          final body = jsonDecode(response.body);
-          // Navega para a tela de Bluetooth passando o token
+          // 2) Navega para a tela de Bluetooth
           Get.off(() => BluetoothPage());
         } else {
-          setState(() {
-            _error = 'Falha ao logar na API [${response.statusCode}]';
-          });
+          setState(() => _error = 'Resposta inválida da API.');
         }
-      } catch (e) {
-        print('[DEBUG] Erro ao tentar conectar com a API: $e');
-        setState(() {
-          _error = 'Erro ao conectar com a API: $e';
-        });
+      } else {
+        setState(() => _error = 'Falha no login: ${response.statusCode}');
       }
-    } else {
+    } catch (e) {
+      setState(() => _error = 'Erro ao conectar com a API.');
+      print('[DEBUG] Erro ao conectar com a API: $e');
+    } finally {
       setState(() {
-        _error = 'Usuário ou senha inválidos';
+        _loading = false;
       });
     }
-
-    setState(() {
-      _loading = false;
-    });
   }
 
   @override
@@ -79,11 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: SingleChildScrollView(
             child: Card(
+              margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              elevation: 12,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
-              elevation: 12,
-              margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               child: Padding(
                 padding: const EdgeInsets.all(28.0),
                 child: Form(
@@ -103,7 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 20),
                       Text(
                         "Bem-vindo",
-                        style: Theme.of(context).textTheme.headlineSmall!
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall!
                             .copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.deepPurple,
@@ -127,9 +128,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderSide: BorderSide.none,
                           ),
                         ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Digite o usuário'
-                            : null,
+                        validator: (v) =>
+                            v == null || v.isEmpty ? 'Digite o usuário' : null,
                       ),
                       const SizedBox(height: 18),
                       TextFormField(
@@ -145,9 +145,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         obscureText: true,
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Digite a senha'
-                            : null,
+                        validator: (v) =>
+                            v == null || v.isEmpty ? 'Digite a senha' : null,
                       ),
                       const SizedBox(height: 24),
                       if (_error != null)
@@ -158,19 +157,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _loading
-                              ? null
-                              : () {
-                                  if (_formKey.currentState!.validate()) {
-                                    _login();
-                                  }
-                                },
+                          onPressed: _loading ? null : _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurple,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -181,9 +176,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 18,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
+                                    valueColor:
+                                        AlwaysStoppedAnimation<Color>(
+                                            Colors.white),
                                   ),
                                 )
                               : const Text(
